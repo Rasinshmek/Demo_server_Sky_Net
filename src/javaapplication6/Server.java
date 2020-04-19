@@ -162,5 +162,4 @@ class Nitka extends Thread {
         }
         return temp;
     }
-
 }
