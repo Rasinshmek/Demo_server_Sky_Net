@@ -75,7 +75,7 @@ class Nitka extends Thread {
     @Override
     public void run() {
         String word;
-       // send("?CON");
+        send("?CON");
         try {
             while (true) {
                 word = in.readUTF();
@@ -84,17 +84,27 @@ class Nitka extends Thread {
                     break;
                 }
                 switch (word) {
-                    case ("HARD: GETVARIABLES"):
-                        send("HARD: SETVARIABLES~~var1=11~~var2=16~~var1=11~~var1=11~~var1=11~~var1=11~~var1=11~~var1=11~~var1=11~~var1=11~~var1=11~~var1=11~~var1=11~~var3=16~~var2=16~~var2=16~~var2=16~~var2=16~~var2=16~~var2=16~~var2=16~~var2=16~~var2=16~~");
-                        System.out.println("HARD: setvariables");
-                        break;
-                    case ("Hello World"):
-                        send("HARD: GETCMD");
-                        System.out.println("HARD: GETCMD");
-                        break;
-                    case ("CON OK"):
-                        send("CON OK");
-                        System.out.println("HARD: GETCMD");
+                    case ("CON-OK"):
+                        send("?CON-TYPE");
+                        switch (in.readUTF()) {
+                            case ("TYPE=PEOPLE"):
+                                break;
+                            case ("TYPE=MACHINE"):
+                                send("?MAC");
+                                String[] mac = in.readUTF().split("=");
+                                send("?NAME");
+                                String[] name = in.readUTF().split("=");
+                                send("?IP");
+                                String[] ip = in.readUTF().split("=");
+                                String select = select("SELECT id FROM skynet_master.machine WHERE MAC='" + mac[1] + "'");
+                                if (select.isEmpty()) {
+                                    update("INSERT INTO skynet_master.machine (name,IP,MAC) VALUES ('" + name[1] + "','" + ip[1] + "','" + mac[1] + "')");
+                                }
+                                
+                                break;
+                            default:
+                                break;
+                        }
                         break;
                     default:
                         // out.close();
@@ -109,13 +119,14 @@ class Nitka extends Thread {
 
     private void send(String msg) {
         try {
+            System.out.println(msg);
             out.writeUTF(msg + "\n");
             out.flush();
         } catch (IOException ignored) {
         }
     }
 
-    private void Update(String ins) {
+    private void update(String ins) {
         try {
             con = DriverManager.getConnection(url + "?user=" + user + "&password=" + password);
             stmt = con.createStatement();
@@ -135,7 +146,7 @@ class Nitka extends Thread {
         }
     }
 
-    private String Select(String sel) {
+    private String select(String sel) {
         ResultSet rss = null;
         String temp = "";
         int i = 0;
