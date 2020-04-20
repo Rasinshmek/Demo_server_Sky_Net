@@ -80,6 +80,7 @@ class Nitka extends Thread {
             while (true) {
                 word = in.readUTF();
                 if (word.equals("stop")) {
+                    System.out.println("Server stoped");
                     System.exit(0);
                     break;
                 }
@@ -97,10 +98,13 @@ class Nitka extends Thread {
                                 send("?IP");
                                 String[] ip = in.readUTF().split("=");
                                 String select = select("SELECT id FROM skynet_master.machine WHERE MAC='" + mac[1] + "'");
-                                if (select.isEmpty()) {
+                                if (!select.isEmpty()) {
                                     update("INSERT INTO skynet_master.machine (name,IP,MAC) VALUES ('" + name[1] + "','" + ip[1] + "','" + mac[1] + "')");
+                                } else {
+                                    update("UPDATE skynet_master.machine SET name='" + name[1] + "',IP='" + ip[1] + "' WHERE MAC='" + mac[1] + "'");
+
                                 }
-                                
+
                                 break;
                             default:
                                 break;
